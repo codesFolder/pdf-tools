@@ -1,0 +1,150 @@
+<!-- pdf-to-text.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert PDF to Text - PDF Toolbox</title>
+    <link rel="stylesheet" href="/public/styles.css">
+    <style>
+        /* Styles specific to our tool pages */
+        .tool-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 700px;
+            margin: 40px auto;
+        }
+        .tool-container h1 { margin-top: 0; }
+        .upload-form label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .upload-form input[type="file"] {
+            display: block;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #result-section {
+            display: none; /* Hidden by default */
+            margin-top: 30px;
+        }
+        #result-text {
+            width: 100%;
+            height: 300px;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+        #status-message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="tool-container">
+        <a href="/">&larr; Back to all tools</a>
+        <h1>Convert PDF to Text</h1>
+        <p>Upload a PDF file to extract all its text content.</p>
+
+        <form id="upload-form" class="upload-form">
+            <label for="pdf-file">Choose a PDF file:</label>
+            <input type="file" id="pdf-file" name="pdf_file" accept=".pdf" required>
+            <button type="submit" id="submit-btn" class="btn">Convert to Text</button>
+        </form>
+
+        <div id="status-message"></div>
+
+        <div id="result-section">
+            <h2>Extracted Text:</h2>
+            <textarea id="result-text" readonly></textarea>
+            <button id="download-btn" class="btn">Download .txt file</button>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('upload-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const statusMessage = document.getElementById('status-message');
+        const resultSection = document.getElementById('result-section');
+        const resultText = document.getElementById('result-text');
+        const downloadBtn = document.getElementById('download-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent the form from submitting the traditional way
+            
+            const fileInput = document.getElementById('pdf-file');
+            if (fileInput.files.length === 0) {
+                statusMessage.textContent = 'Please select a file.';
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            statusMessage.textContent = 'Uploading and processing your file, please wait.';
+            resultSection.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('pdf_file', fileInput.files[0]);
+
+            try {
+                // The API endpoint corresponds to the python filename in the /api folder
+                const response = await fetch('/api/pdf_to_text', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    statusMessage.textContent = 'Conversion successful!';
+                    resultText.value = result.text;
+                    resultSection.style.display = 'block';
+                } else {
+                    throw new Error(result.error || 'An unknown error occurred.');
+                }
+
+            } catch (error) {
+                statusMessage.textContent = `Error: ${error.message}`;
+                statusMessage.style.color = 'red';
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Convert to Text';
+            }
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const blob = new Blob([resultText.value], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted_text.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>

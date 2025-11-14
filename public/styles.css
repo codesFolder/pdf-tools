@@ -1,0 +1,55 @@
+/* public/styles.css */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+header h1 {
+    font-size: 2.5rem;
+    color: #1a1a1a;
+}
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+.tool-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.tool-card h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: #0056b3;
+}
+.tool-card.disabled {
+    background-color: #f9f9f9;
+    color: #999;
+    cursor: not-allowed;
+}
+.tool-card.disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+.tool-card.disabled h2 {
+    color: #999;
+}
